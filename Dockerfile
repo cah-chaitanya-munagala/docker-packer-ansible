@@ -1,8 +1,8 @@
-FROM oraclelinux:7.5
+FROM alpine:3.8
 
-RUN yum-config-manager --enable ol7_developer_EPEL \
+RUN apk add --no-cache --virtual .build curl \
     && \
-    yum install -y unzip make gcc libffi-devel openssl-devel sshpass \
+    apk add --no-cache ansible git \
     && \
     curl -L https://releases.hashicorp.com/packer/1.3.1/packer_1.3.1_linux_amd64.zip -o /packer.zip \
     && \
@@ -16,26 +16,10 @@ RUN yum-config-manager --enable ol7_developer_EPEL \
     && \
     chmod +x /tini \
     && \
-    curl -L https://bootstrap.pypa.io/get-pip.py -o /get-pip.py \
-    && \
-    python /get-pip.py \
-    && \
-    rm -f /get-pip.py \
-    && \
-    pip install ansible==2.5.5 netaddr \
+    pip3 install netaddr \
     && \
     rm -rf ~/.cache/pip/ \
     && \
-    rm -rf /usr/lib/python2.7/site-packages/pip-* /usr/bin/pip* /usr/lib/python2.7/site-packages/pip/ \
-    && \
-    rm -rf /usr/lib/python2.7/site-packages/wheel/ \
-    && \
-    rm -rf /usr/lib/python2.7/site-packages/setuptools/ \
-    && \
-    yum remove -y unzip make gcc openssl-devel \
-    && \
-    yum clean all \
-    && \
-    rm -rf /var/cache/yum/*
+    apk del .build
 
 ENTRYPOINT ["/tini", "--", "/packer"]
